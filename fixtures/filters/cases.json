@@ -1,0 +1,140 @@
+{
+  "fixtureVersion": 1,
+  "filesystemRoot": "../fs",
+  "description": "PipeIgnore Standard Filters fixtures. Child names are exact entry names, not glob patterns.",
+  "cases": [
+    {
+      "id": "has-git-directory",
+      "filter": "has",
+      "path": "repo-git-dir",
+      "args": [
+        ".git"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-git-file",
+      "filter": "has",
+      "path": "repo-git-file",
+      "args": [
+        ".git"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-multiple-any-first",
+      "filter": "has",
+      "path": "repo-git-dir",
+      "args": [
+        ".git",
+        ".hg"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-multiple-any-second",
+      "filter": "has",
+      "path": "repo-hg",
+      "args": [
+        ".git",
+        ".hg"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-none",
+      "filter": "has",
+      "path": "plain",
+      "args": [
+        ".git",
+        ".hg"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-immediate-only",
+      "filter": "has",
+      "path": "nested-only",
+      "args": [
+        ".git"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-exact-name-not-glob",
+      "filter": "has",
+      "path": "exact-name",
+      "args": [
+        "*.txt"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-on-file-rejects",
+      "filter": "has",
+      "path": "single-file.txt",
+      "args": [
+        ".git"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-all-positive",
+      "filter": "has-all",
+      "path": "repo-multi",
+      "args": [
+        ".git",
+        ".hg"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-all-negative",
+      "filter": "has-all",
+      "path": "repo-git-dir",
+      "args": [
+        ".git",
+        ".hg"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-all-node-positive",
+      "filter": "has-all",
+      "path": "node-complete",
+      "args": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "expected": true
+    },
+    {
+      "id": "has-all-node-negative",
+      "filter": "has-all",
+      "path": "node-partial",
+      "args": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "expected": false
+    },
+    {
+      "id": "has-zero-args",
+      "filter": "has",
+      "path": "plain",
+      "args": [],
+      "expectedError": {
+        "type": "InvalidArgumentsError"
+      }
+    },
+    {
+      "id": "has-all-zero-args",
+      "filter": "has-all",
+      "path": "plain",
+      "args": [],
+      "expectedError": {
+        "type": "InvalidArgumentsError"
+      }
+    }
+  ]
+}

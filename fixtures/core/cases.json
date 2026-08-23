@@ -1,0 +1,439 @@
+{
+  "fixtureVersion": 1,
+  "description": "Language-agnostic PipeIgnore Core conformance fixtures. Matcher and filter behavior is injected so Core can be tested independently.",
+  "cases": [
+    {
+      "id": "plain-rule-match",
+      "document": "*.log",
+      "path": "app.log",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "*.log",
+            "path": "app.log",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": true,
+        "matcherCalls": [
+          {
+            "pattern": "*.log",
+            "path": "app.log"
+          }
+        ],
+        "filterCalls": []
+      }
+    },
+    {
+      "id": "plain-rule-no-match",
+      "document": "*.log",
+      "path": "app.txt",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "*.log",
+            "path": "app.txt",
+            "result": false
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": false
+      }
+    },
+    {
+      "id": "pipeline-all-accept",
+      "document": "**/ | first alpha | second beta gamma",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "first": [
+          {
+            "args": [
+              "alpha"
+            ],
+            "result": true
+          }
+        ],
+        "second": [
+          {
+            "args": [
+              "beta",
+              "gamma"
+            ],
+            "result": true
+          }
+        ]
+      },
+      "expected": {
+        "ignored": true,
+        "filterCalls": [
+          {
+            "name": "first",
+            "path": "project/",
+            "args": [
+              "alpha"
+            ]
+          },
+          {
+            "name": "second",
+            "path": "project/",
+            "args": [
+              "beta",
+              "gamma"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pipeline-short-circuit",
+      "document": "**/ | first alpha | must-not-run beta",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "first": [
+          {
+            "args": [
+              "alpha"
+            ],
+            "result": false
+          }
+        ],
+        "must-not-run": [
+          {
+            "args": [
+              "beta"
+            ],
+            "result": true
+          }
+        ]
+      },
+      "expected": {
+        "ignored": false,
+        "filterCalls": [
+          {
+            "name": "first",
+            "path": "project/",
+            "args": [
+              "alpha"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "negated-filter-accepts-rejection",
+      "document": "**/ | ! first alpha",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "first": [
+          {
+            "args": [
+              "alpha"
+            ],
+            "result": false
+          }
+        ]
+      },
+      "expected": {
+        "ignored": true
+      }
+    },
+    {
+      "id": "negated-filter-rejects-acceptance",
+      "document": "**/ | ! first alpha",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "first": [
+          {
+            "args": [
+              "alpha"
+            ],
+            "result": true
+          }
+        ]
+      },
+      "expected": {
+        "ignored": false
+      }
+    },
+    {
+      "id": "rule-negation-last-match-wins",
+      "document": "foo\n!foo\n",
+      "path": "foo",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "foo",
+            "path": "foo",
+            "result": true
+          },
+          {
+            "pattern": "foo",
+            "path": "foo",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": false,
+        "matcherCalls": [
+          {
+            "pattern": "foo",
+            "path": "foo"
+          },
+          {
+            "pattern": "foo",
+            "path": "foo"
+          }
+        ],
+        "note": "Core strips Git rule-negation before invoking the matcher."
+      }
+    },
+    {
+      "id": "later-pipeline-rule-wins",
+      "document": "!foo\nfoo | accept\n",
+      "path": "foo",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "foo",
+            "path": "foo",
+            "result": true
+          },
+          {
+            "pattern": "foo",
+            "path": "foo",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "accept": [
+          {
+            "args": [],
+            "result": true
+          }
+        ]
+      },
+      "expected": {
+        "ignored": true
+      }
+    },
+    {
+      "id": "literal-pipe-without-whitespace",
+      "document": "foo|bar",
+      "path": "foo|bar",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "foo|bar",
+            "path": "foo|bar",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": true,
+        "matcherCalls": [
+          {
+            "pattern": "foo|bar",
+            "path": "foo|bar"
+          }
+        ]
+      }
+    },
+    {
+      "id": "multiple-whitespace-around-pipe",
+      "document": "**/\t  |\t   accept value",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "accept": [
+          {
+            "args": [
+              "value"
+            ],
+            "result": true
+          }
+        ]
+      },
+      "expected": {
+        "ignored": true
+      }
+    },
+    {
+      "id": "comments-blank-lines-and-modeline",
+      "document": "# syntax: pipeignore\n\n# comment\n*.tmp\n",
+      "path": "cache.tmp",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "*.tmp",
+            "path": "cache.tmp",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": true,
+        "version": 1
+      }
+    },
+    {
+      "id": "explicit-version-one",
+      "document": "# syntax: pipeignore/1\n*.tmp\n",
+      "path": "cache.tmp",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "*.tmp",
+            "path": "cache.tmp",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expected": {
+        "ignored": true,
+        "version": 1
+      }
+    },
+    {
+      "id": "unsupported-version",
+      "document": "# syntax: pipeignore/999\n*.tmp\n",
+      "path": "cache.tmp",
+      "matcher": {
+        "results": []
+      },
+      "filters": {},
+      "expectedError": {
+        "type": "UnsupportedVersionError"
+      }
+    },
+    {
+      "id": "unknown-filter",
+      "document": "**/ | unknown-filter value",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {},
+      "expectedError": {
+        "type": "UnknownFilterError",
+        "filter": "unknown-filter"
+      }
+    },
+    {
+      "id": "matcher-error-is-not-no-match",
+      "document": "*.log",
+      "path": "app.log",
+      "matcher": {
+        "errors": [
+          {
+            "pattern": "*.log",
+            "path": "app.log",
+            "error": "synthetic matcher failure"
+          }
+        ]
+      },
+      "filters": {},
+      "expectedError": {
+        "type": "MatcherError"
+      }
+    },
+    {
+      "id": "filter-error-is-not-rejection",
+      "document": "**/ | broken",
+      "path": "project/",
+      "matcher": {
+        "results": [
+          {
+            "pattern": "**/",
+            "path": "project/",
+            "result": true
+          }
+        ]
+      },
+      "filters": {
+        "broken": [
+          {
+            "args": [],
+            "error": "synthetic filter failure"
+          }
+        ]
+      },
+      "expectedError": {
+        "type": "FilterError"
+      }
+    },
+    {
+      "id": "malformed-empty-stage",
+      "document": "**/ | ",
+      "path": "project/",
+      "matcher": {
+        "results": []
+      },
+      "filters": {},
+      "expectedError": {
+        "type": "SyntaxError"
+      }
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "fixtureVersion": 1,
+  "description": "PipeIgnore Matcher conformance fixtures. Patterns are Git-ignore patterns, not shell globs.",
+  "cases": [
+    {
+      "id": "basename-star-root",
+      "pattern": "*.log",
+      "path": "app.log",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "basename-star-nested",
+      "pattern": "*.log",
+      "path": "logs/app.log",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "basename-star-negative",
+      "pattern": "*.log",
+      "path": "app.txt",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": false
+    },
+    {
+      "id": "question-mark",
+      "pattern": "foo?",
+      "path": "foo1",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "character-range-positive",
+      "pattern": "[ab].txt",
+      "path": "a.txt",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "character-range-negative",
+      "pattern": "[ab].txt",
+      "path": "c.txt",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": false
+    },
+    {
+      "id": "root-anchored-directory-positive",
+      "pattern": "/build/",
+      "path": "build/",
+      "context": {
+        "isDirectory": true
+      },
+      "expected": true
+    },
+    {
+      "id": "root-anchored-directory-negative-nested",
+      "pattern": "/build/",
+      "path": "nested/build/",
+      "context": {
+        "isDirectory": true
+      },
+      "expected": false
+    },
+    {
+      "id": "unanchored-directory-nested",
+      "pattern": "build/",
+      "path": "nested/build/",
+      "context": {
+        "isDirectory": true
+      },
+      "expected": true
+    },
+    {
+      "id": "directory-only-does-not-match-file",
+      "pattern": "build/",
+      "path": "build",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": false
+    },
+    {
+      "id": "double-star-middle",
+      "pattern": "a/**/b",
+      "path": "a/x/y/b",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "double-star-directory-pattern",
+      "pattern": "**/",
+      "path": "foo/bar/",
+      "context": {
+        "isDirectory": true
+      },
+      "expected": true
+    },
+    {
+      "id": "escaped-leading-hash",
+      "pattern": "\\#literal",
+      "path": "#literal",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "escaped-leading-bang",
+      "pattern": "\\!literal",
+      "path": "!literal",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "literal-pipe",
+      "pattern": "foo|bar",
+      "path": "foo|bar",
+      "context": {
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "relative-root-context",
+      "pattern": "/src/*.js",
+      "path": "/workspace/project/src/main.js",
+      "context": {
+        "root": "/workspace/project",
+        "isDirectory": false
+      },
+      "expected": true
+    },
+    {
+      "id": "relative-root-context-negative",
+      "pattern": "/src/*.js",
+      "path": "/workspace/project/nested/src/main.js",
+      "context": {
+        "root": "/workspace/project",
+        "isDirectory": false
+      },
+      "expected": false
+    }
+  ]
+}

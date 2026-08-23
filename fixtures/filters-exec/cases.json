@@ -1,0 +1,182 @@
+{
+  "fixtureVersion": 1,
+  "description": "Execution Filters fixtures use an abstract process runner. They do not require a particular OS or shell.",
+  "cases": [
+    {
+      "id": "exec-success",
+      "filter": "exec",
+      "path": "project",
+      "args": [
+        "probe",
+        "--path",
+        "{}"
+      ],
+      "process": {
+        "spawn": {
+          "program": "probe",
+          "argv": [
+            "--path",
+            "project"
+          ]
+        },
+        "exitStatus": 0
+      },
+      "expected": true
+    },
+    {
+      "id": "exec-rejection",
+      "filter": "exec",
+      "path": "project",
+      "args": [
+        "probe",
+        "--path",
+        "{}"
+      ],
+      "process": {
+        "spawn": {
+          "program": "probe",
+          "argv": [
+            "--path",
+            "project"
+          ]
+        },
+        "exitStatus": 1
+      },
+      "expected": false
+    },
+    {
+      "id": "exec-embedded-placeholder",
+      "filter": "exec",
+      "path": "project",
+      "args": [
+        "probe",
+        "{}/.git"
+      ],
+      "process": {
+        "spawn": {
+          "program": "probe",
+          "argv": [
+            "project/.git"
+          ]
+        },
+        "exitStatus": 0
+      },
+      "expected": true
+    },
+    {
+      "id": "exec-no-shell-expansion",
+      "filter": "exec",
+      "path": "project",
+      "args": [
+        "probe",
+        "*",
+        "$HOME",
+        ">",
+        "{}"
+      ],
+      "process": {
+        "spawn": {
+          "program": "probe",
+          "argv": [
+            "*",
+            "$HOME",
+            ">",
+            "project"
+          ]
+        },
+        "exitStatus": 0
+      },
+      "expected": true
+    },
+    {
+      "id": "exec-spawn-error",
+      "filter": "exec",
+      "path": "project",
+      "args": [
+        "missing-program",
+        "{}"
+      ],
+      "process": {
+        "spawnError": "ENOENT"
+      },
+      "expectedError": {
+        "type": "ExecutionError"
+      }
+    },
+    {
+      "id": "shell-success",
+      "filter": "shell",
+      "path": "project",
+      "args": [
+        "exit 0"
+      ],
+      "process": {
+        "shellCommand": "exit 0",
+        "exitStatus": 0
+      },
+      "expected": true
+    },
+    {
+      "id": "shell-rejection",
+      "filter": "shell",
+      "path": "project",
+      "args": [
+        "exit 1"
+      ],
+      "process": {
+        "shellCommand": "exit 1",
+        "exitStatus": 1
+      },
+      "expected": false
+    },
+    {
+      "id": "shell-launch-error",
+      "filter": "shell",
+      "path": "project",
+      "args": [
+        "noop"
+      ],
+      "process": {
+        "spawnError": "synthetic shell launch failure"
+      },
+      "expectedError": {
+        "type": "ExecutionError"
+      }
+    },
+    {
+      "id": "shell-path-first-positional",
+      "filter": "shell",
+      "path": "project",
+      "args": ["test -e \"$1/.git\"", "{}"],
+      "expectedInvocation": {
+        "command": "test -e \"$1/.git\"",
+        "argv0": "pipeignore",
+        "positionalArgs": ["project"]
+      },
+      "expected": true
+    },
+    {
+      "id": "shell-path-precomposed",
+      "filter": "shell",
+      "path": "project",
+      "args": ["test -e \"$1\"", "{}/.git"],
+      "expectedInvocation": {
+        "command": "test -e \"$1\"",
+        "argv0": "pipeignore",
+        "positionalArgs": ["project/.git"]
+      },
+      "expected": true
+    },
+    {
+      "id": "shell-no-path-placeholder",
+      "filter": "shell",
+      "path": "project",
+      "args": ["command -v git >/dev/null"],
+      "expectedInvocation": {
+        "command": "command -v git >/dev/null",
+        "argv0": "pipeignore",
+        "positionalArgs": []
+      }
+    }
+  ]
+}
